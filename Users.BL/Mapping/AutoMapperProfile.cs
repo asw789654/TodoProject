@@ -9,6 +9,6 @@ public class AutoMapperProfile : Profile
     public AutoMapperProfile()
     {
         CreateMap<AddUserDto,User>();
-        CreateMap<RemoveUserDto, User>();
+        CreateMap<UpdateUserDto, User>();
     }
 }

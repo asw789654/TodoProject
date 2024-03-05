@@ -13,7 +13,7 @@ public interface ITodoService
 
     public Todo PatchIsDone(PatchIsDoneTodoDto todo);
 
-    public int Count(string? labelFreeText);
+    public int Count(string? labelFreeText, int? OwnerId);
 
     public bool Delete(RemoveTodoDto todo);
 

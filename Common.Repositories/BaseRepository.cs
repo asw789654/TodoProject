@@ -6,7 +6,9 @@ public class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : clas
 {
     private readonly List<TEntity> _data = [];
 
-    public TEntity[] GetList(int? offset = null, int? limit = null, Expression<Func<TEntity, bool>>? predicate = null,
+    public TEntity[] GetList(int? offset = null, int? limit = null, 
+        Expression<Func<TEntity, bool>>? filterBy = null, 
+        Expression<Func<TEntity, bool>>? predicate = null,
         Expression<Func<TEntity, object>>? orderBy = null,
         bool? descending = null)
     {
@@ -15,6 +17,10 @@ public class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : clas
         if (predicate != null)
         {
             result = result.Where(predicate.Compile());
+        }
+        if (filterBy != null) 
+        {
+            result = result.Where(filterBy.Compile());
         }
 
         if (orderBy != null)
@@ -44,13 +50,20 @@ public class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : clas
         return _data.SingleOrDefault(predicate.Compile());
     }
 
-    public int Count(Expression<Func<TEntity, bool>>? predicate = null)
+    public int Count(Expression<Func<TEntity, bool>>? predicate = null, 
+        Expression<Func<TEntity, bool>>? filterBy = null)
     {
         IEnumerable<TEntity> entities = _data;
+        if (filterBy != null)
+        {
+            entities = entities.Where(filterBy.Compile());
+        }
+
         if (predicate == null)
         {
             return entities.Count();
         }
+
 
         return entities.Where(predicate.Compile()).Count();
     }

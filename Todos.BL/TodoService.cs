@@ -40,13 +40,8 @@ public class TodoService : ITodoService
 
     public IReadOnlyCollection<Todo> GetList(int? offset, string? labelFreeText, int? ownerId, int? limit = 10)
     {
-        /* не уверен как правильно в серивис это нельзя вставлять вроде, но и в common тоже вроде нельзя
-          if(ownerId != null)
-        {
-            list = list.Where(l => l.OwnerId == ownerId).ToArray();
-        }
-        */
-        return _todoRepository.GetList(offset, limit,
+        return _todoRepository.GetList(offset, limit, 
+            ownerId == null ? null : t => t.OwnerId == ownerId,
             labelFreeText == null ? null : t => t.Label.Contains(labelFreeText, StringComparison.InvariantCulture),
             t => t.Id); ;
     }
@@ -62,31 +57,37 @@ public class TodoService : ITodoService
         {
             throw new Exception("Incorrect User");
         }
+        createTodoDto.Id = _todoRepository.Count() + 1;
         var todoEntity = _mapper.Map<Todo>(createTodoDto);
         return _todoRepository.Add(todoEntity);
     }
 
     public Todo? Update(PutTodoDto putTodoDto)
     {
-        var user = _usersRepository.SingleOrDefault(t => t.Id == putTodoDto.Id);
+        var user = _usersRepository.SingleOrDefault(t => t.Id == putTodoDto.OwnerId);
         if (user is null)
         {
             throw new Exception("Incorrect User");
         }
-        var todoEntity = _mapper.Map<Todo>(putTodoDto);
+
+        var todoEntity = _todoRepository.SingleOrDefault(t => t.Id == putTodoDto.Id);
+        _mapper.Map(putTodoDto, todoEntity);
         return _todoRepository.Update(todoEntity);
     }
 
-    public int Count(string? labelFreeText)
+    public int Count(string? labelFreeText,int? ownerId)
     {
-        return _todoRepository.Count(labelFreeText == null
-            ? null
-            : b => b.Label.Contains(labelFreeText, StringComparison.CurrentCultureIgnoreCase));
+        return _todoRepository.Count(
+            labelFreeText == null ? null
+            : b => b.Label.Contains(labelFreeText, StringComparison.CurrentCultureIgnoreCase),
+            ownerId == null ? null
+            : b => b.OwnerId == ownerId);
     }
 
     public Todo PatchIsDone(PatchIsDoneTodoDto patchIsDoneTodoDto)
     {
-        var todoEntity = _mapper.Map<Todo>(patchIsDoneTodoDto);
+        var todoEntity = _todoRepository.SingleOrDefault(t => t.Id == patchIsDoneTodoDto.Id);
+        _mapper.Map(patchIsDoneTodoDto, todoEntity);
         return _todoRepository.Update(todoEntity);
     }
 

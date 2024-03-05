@@ -13,9 +13,8 @@ public static class TodosServicesDI
     {  
         services.AddAutoMapper(typeof(AutoMapperProfile));
         services.AddTransient<ITodoService, TodoService>();
-        services.AddTransient<IUserService, UserService>();
-        services.AddTransient<IRepository<Todo>, BaseRepository<Todo>>();
-        services.AddTransient<IRepository<User>, BaseRepository<User>>();
+        services.AddSingleton<IRepository<Todo>, BaseRepository<Todo>>();
+        services.AddSingleton<IRepository<User>, BaseRepository<User>>();
         return services;
     }
 }

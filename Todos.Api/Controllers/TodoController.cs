@@ -18,7 +18,11 @@ public class TodoController : ControllerBase
     public IActionResult GetList(int? limit, int? offset, int? ownerId, string? labelFreeText)
     {
         var todos = _todoService.GetList(offset, labelFreeText, ownerId, limit);
-        var count = _todoService.Count(null);
+        if (todos == null)
+        {
+            return NotFound();
+        }
+        var count = _todoService.Count(labelFreeText,ownerId);
         HttpContext.Response.Headers.Append("X-Tatal-Count",count.ToString());
         return Ok(todos);
     }
@@ -50,10 +54,6 @@ public class TodoController : ControllerBase
     [HttpPost]
     public IActionResult AddToList(CreateTodoDto todo)
     {
-        if (todo == null)
-        {
-            return NotFound();
-        }
         var todoEntity = _todoService.AddToList(todo);
         return Created($"/Todo/{todoEntity.Id}", todoEntity);
     }
@@ -61,7 +61,7 @@ public class TodoController : ControllerBase
     [HttpPut]
     public IActionResult PutToList(PutTodoDto todo)
     {
-        if (todo == null)
+        if (_todoService.GetById(todo.Id) == null)
         {
             return NotFound();
         }
@@ -71,7 +71,7 @@ public class TodoController : ControllerBase
     [HttpPatch]
     public IActionResult PatchIsDone(PatchIsDoneTodoDto todo)
     {
-        if (todo == null)
+        if (_todoService.GetById(todo.Id) == null)
         {
             return NotFound();
         }
@@ -81,7 +81,7 @@ public class TodoController : ControllerBase
     [HttpDelete]
     public IActionResult Remove(RemoveTodoDto todo)
     {
-        if (todo == null)
+        if (_todoService.GetById(todo.Id) == null)
         {
             return NotFound();
         }

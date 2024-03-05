@@ -16,7 +16,7 @@ internal class Programm
         builder.Services.AddUsersServices();
         //builder.Services.AddScoped<TodoService>();
         //builder.Services.AddSingleton<TodoService>();
-        TodosServicesDI.AddServices(builder.Services);
+        TodosServicesDI.AddTodosServices(builder.Services);
         builder.Services.AddSwaggerGen();
 
         var app = builder.Build();

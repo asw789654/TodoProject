@@ -11,6 +11,5 @@ public class AutoMapperProfile : Profile
         CreateMap<CreateTodoDto,Todo>();
         CreateMap<PatchIsDoneTodoDto, Todo>();
         CreateMap<PutTodoDto, Todo>();
-        CreateMap<RemoveTodoDto, Todo>();
     }
 }

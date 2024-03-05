@@ -13,8 +13,8 @@ public static class UsersServicesDI
     {  
         services.AddAutoMapper(typeof(AutoMapperProfile));
         services.AddTransient<IUserService, UserService>();
-        services.AddTransient<IRepository<Todo>, BaseRepository<Todo>>();
-        services.AddTransient<IRepository<User>, BaseRepository<User>>();
+        services.AddSingleton<IRepository<Todo>, BaseRepository<Todo>>();
+        services.AddSingleton<IRepository<User>, BaseRepository<User>>();
         return services;
     }
 }

@@ -9,7 +9,7 @@ namespace Users.Services
         public User? GetById(int id);
         public User? AddToList(AddUserDto todo);
 
-        public User Update(User todo);
+        public User Update(UpdateUserDto todo);
 
         public bool Delete(RemoveUserDto user);
 
