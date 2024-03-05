@@ -1,5 +1,4 @@
 using Todos.BL;
-using Todos.Repositories;
 using Users.Services;
 using Common.Repositories;
 using Common.Domain;
@@ -14,13 +13,9 @@ internal class Programm
         builder.Services.AddControllers();
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSingleton<ITodoService, TodoService>();
-        builder.Services.AddSingleton<IUserService, UserService>();
-        builder.Services.AddSingleton<IRepository<Todo>, BaseRepository<Todo>>();
-        builder.Services.AddSingleton<IRepository<User>, BaseRepository<User>>();
         //builder.Services.AddScoped<TodoService>();
         //builder.Services.AddSingleton<TodoService>();
-        DependencyInjection.AddServices(builder.Services);
+        TodosServicesDI.AddTodosServices(builder.Services);
         builder.Services.AddSwaggerGen();
 
         var app = builder.Build();

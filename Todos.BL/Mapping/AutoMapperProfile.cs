@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.Extensions.DependencyInjection;
-using System.Runtime.CompilerServices;
 using Todos.BL.DTO;
 using Todos.Domain;
 

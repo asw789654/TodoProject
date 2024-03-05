@@ -1,8 +1,8 @@
-﻿using Common.Domain;
+﻿using AutoMapper;
+using Common.Domain;
 using Common.Repositories;
 using Todos.BL.DTO;
 using Todos.Domain;
-using Todos.Repositories;
 
 namespace Todos.BL;
 
@@ -10,30 +10,45 @@ public class TodoService : ITodoService
 {
     private readonly IRepository<Todo> _todoRepository;
     private readonly IRepository<User> _usersRepository;
+    private readonly IMapper _mapper;
 
-    public TodoService(IRepository<Todo> todoRepositity, IRepository<User> userRepository)
+    public TodoService(IMapper mapper, IRepository<Todo> todoRepositity, IRepository<User> userRepository)
     {
+        _mapper = mapper;
         _usersRepository = userRepository;
         _todoRepository = todoRepositity;
-        _todoRepository.Add(new Todo() { Id = 1, OwnerId = 3, Label = "Label 1", IsDone = true, CreatedDateTime = new DateTime(2024, 2, 26), UpdatedDate = new DateTime(2024, 2, 27) });
-        _todoRepository.Add(new Todo() { Id = 2, OwnerId = 2, Label = "Label 2", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 25), UpdatedDate = new DateTime(2024, 1, 27) });
-        _todoRepository.Add(new Todo() { Id = 3, OwnerId = 1, Label = "Label 3", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 24), UpdatedDate = new DateTime(2024, 1, 26) });
-        _todoRepository.Add(new Todo() { Id = 4, OwnerId = 3, Label = "Label 4", IsDone = true, CreatedDateTime = new DateTime(2024, 2, 23), UpdatedDate = new DateTime(2024, 2, 27) });
-        _todoRepository.Add(new Todo() { Id = 5, OwnerId = 2, Label = "Label 5", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 22), UpdatedDate = new DateTime(2024, 1, 27) });
-        _todoRepository.Add(new Todo() { Id = 6, OwnerId = 1, Label = "Label 6", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 21), UpdatedDate = new DateTime(2024, 1, 26) });
-        _todoRepository.Add(new Todo() { Id = 7, OwnerId = 3, Label = "Label 7", IsDone = true, CreatedDateTime = new DateTime(2024, 2, 20), UpdatedDate = new DateTime(2024, 2, 27) });
-        _todoRepository.Add(new Todo() { Id = 8, OwnerId = 2, Label = "Label 8", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 28), UpdatedDate = new DateTime(2024, 1, 27) });
-        _todoRepository.Add(new Todo() { Id = 9, OwnerId = 1, Label = "Label 9", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 27), UpdatedDate = new DateTime(2024, 1, 26) });
-        _usersRepository.Add(new User() { Id = 1, Name = "name1" });
-        _usersRepository.Add(new User() { Id = 2, Name = "name2" });
-        _usersRepository.Add(new User() { Id = 3, Name = "name3" });
+        if (_usersRepository.Count() == 0)
+        {
+            _usersRepository.Add(new User() { Id = 1, Name = "name1" });
+            _usersRepository.Add(new User() { Id = 2, Name = "name2" });
+            _usersRepository.Add(new User() { Id = 3, Name = "name3" });
+        }
+        if (_todoRepository.Count() == 0)
+        {
+            _todoRepository.Add(new Todo() { Id = 1, OwnerId = 3, Label = "Label 1", IsDone = true, CreatedDateTime = new DateTime(2024, 2, 26), UpdatedDate = new DateTime(2024, 2, 27) });
+            _todoRepository.Add(new Todo() { Id = 2, OwnerId = 2, Label = "Label 2", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 25), UpdatedDate = new DateTime(2024, 1, 27) });
+            _todoRepository.Add(new Todo() { Id = 3, OwnerId = 1, Label = "Label 3", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 24), UpdatedDate = new DateTime(2024, 1, 26) });
+            _todoRepository.Add(new Todo() { Id = 4, OwnerId = 3, Label = "Label 4", IsDone = true, CreatedDateTime = new DateTime(2024, 2, 23), UpdatedDate = new DateTime(2024, 2, 27) });
+            _todoRepository.Add(new Todo() { Id = 5, OwnerId = 2, Label = "Label 5", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 22), UpdatedDate = new DateTime(2024, 1, 27) });
+            _todoRepository.Add(new Todo() { Id = 6, OwnerId = 1, Label = "Label 6", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 21), UpdatedDate = new DateTime(2024, 1, 26) });
+            _todoRepository.Add(new Todo() { Id = 7, OwnerId = 3, Label = "Label 7", IsDone = true, CreatedDateTime = new DateTime(2024, 2, 20), UpdatedDate = new DateTime(2024, 2, 27) });
+            _todoRepository.Add(new Todo() { Id = 8, OwnerId = 2, Label = "Label 8", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 28), UpdatedDate = new DateTime(2024, 1, 27) });
+            _todoRepository.Add(new Todo() { Id = 9, OwnerId = 1, Label = "Label 9", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 27), UpdatedDate = new DateTime(2024, 1, 26) });
+
+        }
     }
 
     public IReadOnlyCollection<Todo> GetList(int? offset, string? labelFreeText, int? ownerId, int? limit = 10)
     {
+        /* не уверен как правильно в серивис это нельзя вставлять вроде, но и в common тоже вроде нельзя
+          if(ownerId != null)
+        {
+            list = list.Where(l => l.OwnerId == ownerId).ToArray();
+        }
+        */
         return _todoRepository.GetList(offset, limit,
-            labelFreeText == null ? null : u => u.Label.Contains(labelFreeText, StringComparison.InvariantCulture),
-            u => u.Id);
+            labelFreeText == null ? null : t => t.Label.Contains(labelFreeText, StringComparison.InvariantCulture),
+            t => t.Id); ;
     }
 
     public Todo? GetById(int id)
@@ -43,17 +58,12 @@ public class TodoService : ITodoService
 
     public Todo? AddToList(CreateTodoDto createTodoDto)
     {
-        if (createTodoDto is null)
+        if (_usersRepository.SingleOrDefault(t => t.Id == createTodoDto.OwnerId) is null)
         {
             throw new Exception("Incorrect User");
         }
-        var todoEntity = new Todo()
-        {
-            IsDone = createTodoDto.IsDone,
-            OwnerId = createTodoDto.OwnerId,
-            Label = createTodoDto.Label
-        };
-        return _todoRepository.Add(todoEntity); 
+        var todoEntity = _mapper.Map<Todo>(createTodoDto);
+        return _todoRepository.Add(todoEntity);
     }
 
     public Todo? Update(PutTodoDto putTodoDto)
@@ -63,27 +73,27 @@ public class TodoService : ITodoService
         {
             throw new Exception("Incorrect User");
         }
-        var todoEntity = GetById(putTodoDto.Id);
+        var todoEntity = _mapper.Map<Todo>(putTodoDto);
         return _todoRepository.Update(todoEntity);
     }
 
-    public int Count(string? labelFreeText) 
+    public int Count(string? labelFreeText)
     {
         return _todoRepository.Count(labelFreeText == null
-            ? null 
-            : b => b.Label.Contains(labelFreeText,StringComparison.CurrentCultureIgnoreCase));
+            ? null
+            : b => b.Label.Contains(labelFreeText, StringComparison.CurrentCultureIgnoreCase));
     }
 
     public Todo PatchIsDone(PatchIsDoneTodoDto patchIsDoneTodoDto)
     {
-        var todoEntity = GetById(patchIsDoneTodoDto.Id);
+        var todoEntity = _mapper.Map<Todo>(patchIsDoneTodoDto);
         return _todoRepository.Update(todoEntity);
     }
 
     public bool Delete(RemoveTodoDto removeTodoDto)
     {
         var todoEntity = GetById(removeTodoDto.Id);
-        if(todoEntity is null)
+        if (todoEntity is null)
         {
             return false;
         }
