@@ -18,10 +18,6 @@ public class TodoController : ControllerBase
     public IActionResult GetList(int? limit, int? offset, int? ownerId, string? labelFreeText)
     {
         var todos = _todoService.GetList(offset, labelFreeText, ownerId, limit);
-        if (todos == null)
-        {
-            return NotFound();
-        }
         var count = _todoService.Count(labelFreeText,ownerId);
         HttpContext.Response.Headers.Append("X-Tatal-Count",count.ToString());
         return Ok(todos);
