@@ -47,7 +47,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut]
-    public IActionResult PutToList(User user)
+    public IActionResult PutToList(UpdateUserDto user)
     {
         if (user == null)
         {

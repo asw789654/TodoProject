@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Common.Domain;
 using Common.Repositories;
+using Serilog;
 using Todos.BL.DTO;
 using Todos.Domain;
 
@@ -34,7 +35,6 @@ public class TodoService : ITodoService
             _todoRepository.Add(new Todo() { Id = 7, OwnerId = 3, Label = "Label 7", IsDone = true, CreatedDateTime = new DateTime(2024, 2, 20), UpdatedDate = new DateTime(2024, 2, 27) });
             _todoRepository.Add(new Todo() { Id = 8, OwnerId = 2, Label = "Label 8", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 28), UpdatedDate = new DateTime(2024, 1, 27) });
             _todoRepository.Add(new Todo() { Id = 9, OwnerId = 1, Label = "Label 9", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 27), UpdatedDate = new DateTime(2024, 1, 26) });
-
         }
     }
 
@@ -55,6 +55,7 @@ public class TodoService : ITodoService
     {
         if (_usersRepository.SingleOrDefault(t => t.Id == createTodoDto.OwnerId) is null)
         {
+            Log.Error($"Incorrect owner id -{createTodoDto.Id}");
             throw new Exception("Incorrect User");
         }
         createTodoDto.Id = _todoRepository.Count() + 1;
@@ -64,13 +65,18 @@ public class TodoService : ITodoService
 
     public Todo? Update(PutTodoDto putTodoDto)
     {
-        var user = _usersRepository.SingleOrDefault(t => t.Id == putTodoDto.OwnerId);
-        if (user is null)
+        if (_usersRepository.SingleOrDefault(t => t.Id == putTodoDto.OwnerId) is null)
         {
+            Log.Error($"Incorrect owner id -{putTodoDto.Id}");
             throw new Exception("Incorrect User");
         }
+        var todoEntity = GetById(putTodoDto.Id);
 
-        var todoEntity = _todoRepository.SingleOrDefault(t => t.Id == putTodoDto.Id);
+        if (todoEntity is null)
+        {
+            Log.Error($"Incorrect id -{putTodoDto}");
+            throw new Exception("Incorrect User");
+        }
         _mapper.Map(putTodoDto, todoEntity);
         return _todoRepository.Update(todoEntity);
     }
@@ -86,7 +92,12 @@ public class TodoService : ITodoService
 
     public Todo PatchIsDone(PatchIsDoneTodoDto patchIsDoneTodoDto)
     {
-        var todoEntity = _todoRepository.SingleOrDefault(t => t.Id == patchIsDoneTodoDto.Id);
+        var todoEntity = GetById(patchIsDoneTodoDto.Id);
+        if (todoEntity is null)
+        {
+            Log.Error($"Incorrect id -{patchIsDoneTodoDto.Id}");
+            throw new Exception("Incorrect User");
+        }
         _mapper.Map(patchIsDoneTodoDto, todoEntity);
         return _todoRepository.Update(todoEntity);
     }
@@ -96,7 +107,8 @@ public class TodoService : ITodoService
         var todoEntity = GetById(removeTodoDto.Id);
         if (todoEntity is null)
         {
-            return false;
+            Log.Error($"Incorrect id -{removeTodoDto.Id}");
+            throw new Exception("Incorrect User");
         }
         return _todoRepository.Delete(todoEntity);
     }

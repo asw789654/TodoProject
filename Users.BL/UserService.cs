@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Common.Domain;
 using Common.Repositories;
+using Serilog;
 using Users.BL.DTO;
 
 namespace Users.Services;
@@ -9,13 +10,17 @@ public class UserService : IUserService
 {
     private readonly IRepository<User> _usersRepository;
     private readonly IMapper _mapper;
-    public UserService(IMapper mapper, IRepository<User> usersRepository)
+    public UserService(IMapper mapper,
+        IRepository<User> usersRepository)
     {
         _usersRepository = usersRepository;
         _mapper = mapper;
-        _usersRepository.Add(new User() { Id = 1, Name = "name1" });
-        _usersRepository.Add(new User() { Id = 2, Name = "name2" });
-        _usersRepository.Add(new User() { Id = 3, Name = "name3" });
+        if (_usersRepository.Count() == 0)
+        {
+            _usersRepository.Add(new User() { Id = 1, Name = "name1" });
+            _usersRepository.Add(new User() { Id = 2, Name = "name2" });
+            _usersRepository.Add(new User() { Id = 3, Name = "name3" });
+        }
     }
 
     public IReadOnlyCollection<User> GetList(int? offset, string nameFreeText, int? limit = 10)
@@ -29,29 +34,32 @@ public class UserService : IUserService
         return _usersRepository.SingleOrDefault(u => u.Id == id);
     }
 
-    public User? AddToList(AddUserDto user)
+    public User? AddToList(AddUserDto addUserDto)
     {
-        var userEntity = _mapper.Map<AddUserDto,User>(user);
-        return _usersRepository.Add(userEntity); 
+        var userEntity = _mapper.Map<User>(addUserDto);
+        return _usersRepository.Add(userEntity);
     }
 
     public User Update(UpdateUserDto user)
     {
-        var userEntity = _usersRepository.SingleOrDefault(t => t.Id == user.Id);
+        var userEntity = GetById(user.Id);
         if (userEntity == null)
         {
-            return null;
+            Log.Error($"Incorrect user id -{user.Id}");
+            throw new Exception("Incorrect User");
         }
-        
+
         _mapper.Map(user, userEntity);
         return _usersRepository.Update(userEntity);
     }
     public bool Delete(RemoveUserDto user)
     {
-        var userEntity = new User()
+        var userEntity = GetById(user.Id);
+        if (userEntity is null)
         {
-            Id = user.Id
-        };
+            Log.Error($"Incorrect user id -{user.Id}");
+            throw new Exception("Incorrect User");
+        }
         return _usersRepository.Delete(userEntity);
     }
 
