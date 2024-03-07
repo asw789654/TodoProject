@@ -55,7 +55,7 @@ public class TodoService : ITodoService
     {
         if (_usersRepository.SingleOrDefault(t => t.Id == createTodoDto.OwnerId) is null)
         {
-            Log.Error($"Incorrect owner id -{createTodoDto.Id}");
+            Log.Error($"Incorrect owner id -{createTodoDto}");
             throw new Exception("Incorrect User");
         }
         createTodoDto.Id = _todoRepository.Count() + 1;
