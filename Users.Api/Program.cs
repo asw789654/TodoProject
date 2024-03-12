@@ -2,6 +2,7 @@ using Todos.BL;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using Serilog.Events;
 using Serilog;
+using Common.Repositories;
 
 internal class Programm
 {
@@ -22,9 +23,11 @@ internal class Programm
             builder.Services.AddUsersServices();
             //builder.Services.AddScoped<TodoService>();
             //builder.Services.AddSingleton<TodoService>();
-            TodosServicesDI.AddTodosServices(builder.Services);
+            builder.Services.AddTodosServices();
             builder.Services.AddSwaggerGen();
             builder.Services.AddFluentValidationAutoValidation();
+            builder.Host.UseSerilog();
+            builder.Services.AddTodosDatabase(builder.Configuration);
 
             var app = builder.Build();
 

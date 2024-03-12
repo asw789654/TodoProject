@@ -12,6 +12,7 @@ public interface IRepository<TEntity> where TEntity : class, new()
         Expression<Func<TEntity, object>>? orderBy = null,
         bool? descending = null);
     TEntity? SingleOrDefault(Expression<Func<TEntity, bool>>? predicate = null);
+    Task<TEntity> SingleOrDefauldAsync(Expression<Func<TEntity,bool>>? predicate = null, CancellationToken cancellationToken = default);
     int Count(Expression<Func<TEntity, bool>>? predicate = null, 
             Expression<Func<TEntity, bool>>? filterBy = null);
     TEntity Add(TEntity book);

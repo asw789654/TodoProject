@@ -2,7 +2,7 @@
 
 namespace Common.Repositories;
 
-public class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : class, new()
+public class OldBaseRepository<TEntity> : IRepository<TEntity> where TEntity : class, new()
 {
     private readonly List<TEntity> _data = [];
 
@@ -84,5 +84,10 @@ public class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : clas
     public bool Delete(TEntity book)
     {
         return _data.Remove(book);
+    }
+
+    public Task<TEntity> SingleOrDefauldAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 }

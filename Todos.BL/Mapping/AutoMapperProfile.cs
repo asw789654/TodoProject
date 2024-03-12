@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using Common.Domain;
 using Todos.BL.DTO;
-using Todos.Domain;
 
 namespace Todos.BL.Mapping;
 

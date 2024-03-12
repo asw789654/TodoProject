@@ -18,21 +18,15 @@ public class TodoController : ControllerBase
     public IActionResult GetList(int? limit, int? offset, int? ownerId, string? labelFreeText)
     {
         var todos = _todoService.GetList(offset, labelFreeText, ownerId, limit);
-        var count = _todoService.Count(labelFreeText,ownerId);
-        HttpContext.Response.Headers.Append("X-Tatal-Count",count.ToString());
+        var count = _todoService.Count(labelFreeText, ownerId);
+        HttpContext.Response.Headers.Append("X-Tatal-Count", count.ToString());
         return Ok(todos);
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
-        var todo = _todoService.GetById(id);
-
-        if (todo == null)
-        {
-            return NotFound($"/{id}");
-        }
-
+        var todo = await _todoService.GetByIdAsync(id, cancellationToken);
         return Ok(todo);
     }
 
@@ -40,10 +34,6 @@ public class TodoController : ControllerBase
     public IActionResult GetIsDoneById(int id)
     {
         var todo = _todoService.GetById(id);
-        if (todo == null)
-        {
-            return NotFound($"/{id}");
-        }
         return Ok(todo.IsDone);
     }
 
@@ -57,30 +47,18 @@ public class TodoController : ControllerBase
     [HttpPut]
     public IActionResult PutToList(PutTodoDto todo)
     {
-        if (_todoService.GetById(todo.Id) == null)
-        {
-            return NotFound();
-        }
         return Ok(_todoService.Update(todo));
     }
 
     [HttpPatch]
     public IActionResult PatchIsDone(PatchIsDoneTodoDto todo)
     {
-        if (_todoService.GetById(todo.Id) == null)
-        {
-            return NotFound();
-        }
         return Ok(_todoService.PatchIsDone(todo));
     }
 
     [HttpDelete]
     public IActionResult Remove(RemoveTodoDto todo)
     {
-        if (_todoService.GetById(todo.Id) == null)
-        {
-            return NotFound();
-        }
         return Ok(_todoService.Delete(todo));
     }
 }

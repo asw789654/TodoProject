@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using Common.Api.Exceptions;
 using Common.Domain;
 using Common.Repositories;
 using Serilog;
 using Todos.BL.DTO;
-using Todos.Domain;
 
 namespace Todos.BL;
 
@@ -18,29 +18,11 @@ public class TodoService : ITodoService
         _mapper = mapper;
         _usersRepository = userRepository;
         _todoRepository = todoRepositity;
-        if (_usersRepository.Count() == 0)
-        {
-            _usersRepository.Add(new User() { Id = 1, Name = "name1" });
-            _usersRepository.Add(new User() { Id = 2, Name = "name2" });
-            _usersRepository.Add(new User() { Id = 3, Name = "name3" });
-        }
-        if (_todoRepository.Count() == 0)
-        {
-            _todoRepository.Add(new Todo() { Id = 1, OwnerId = 3, Label = "Label 1", IsDone = true, CreatedDateTime = new DateTime(2024, 2, 26), UpdatedDate = new DateTime(2024, 2, 27) });
-            _todoRepository.Add(new Todo() { Id = 2, OwnerId = 2, Label = "Label 2", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 25), UpdatedDate = new DateTime(2024, 1, 27) });
-            _todoRepository.Add(new Todo() { Id = 3, OwnerId = 1, Label = "Label 3", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 24), UpdatedDate = new DateTime(2024, 1, 26) });
-            _todoRepository.Add(new Todo() { Id = 4, OwnerId = 3, Label = "Label 4", IsDone = true, CreatedDateTime = new DateTime(2024, 2, 23), UpdatedDate = new DateTime(2024, 2, 27) });
-            _todoRepository.Add(new Todo() { Id = 5, OwnerId = 2, Label = "Label 5", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 22), UpdatedDate = new DateTime(2024, 1, 27) });
-            _todoRepository.Add(new Todo() { Id = 6, OwnerId = 1, Label = "Label 6", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 21), UpdatedDate = new DateTime(2024, 1, 26) });
-            _todoRepository.Add(new Todo() { Id = 7, OwnerId = 3, Label = "Label 7", IsDone = true, CreatedDateTime = new DateTime(2024, 2, 20), UpdatedDate = new DateTime(2024, 2, 27) });
-            _todoRepository.Add(new Todo() { Id = 8, OwnerId = 2, Label = "Label 8", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 28), UpdatedDate = new DateTime(2024, 1, 27) });
-            _todoRepository.Add(new Todo() { Id = 9, OwnerId = 1, Label = "Label 9", IsDone = false, CreatedDateTime = new DateTime(2024, 1, 27), UpdatedDate = new DateTime(2024, 1, 26) });
-        }
     }
 
     public IReadOnlyCollection<Todo> GetList(int? offset, string? labelFreeText, int? ownerId, int? limit = 10)
     {
-        return _todoRepository.GetList(offset, limit, 
+        return _todoRepository.GetList(offset, limit,
             ownerId == null ? null : t => t.OwnerId == ownerId,
             labelFreeText == null ? null : t => t.Label.Contains(labelFreeText, StringComparison.InvariantCulture),
             t => t.Id); ;
@@ -48,7 +30,13 @@ public class TodoService : ITodoService
 
     public Todo? GetById(int id)
     {
-        return _todoRepository.SingleOrDefault(t => t.Id == id);
+        var todo = _todoRepository.SingleOrDefault(t => t.Id == id);
+        if (todo == null)
+        {
+            Log.Error($"Incorrect id -{todo}");
+            throw new NotFoundException(new { Id = id });
+        }
+        return todo;
     }
 
     public Todo? AddToList(CreateTodoDto createTodoDto)
@@ -56,7 +44,7 @@ public class TodoService : ITodoService
         if (_usersRepository.SingleOrDefault(t => t.Id == createTodoDto.OwnerId) is null)
         {
             Log.Error($"Incorrect owner id -{createTodoDto}");
-            throw new Exception("Incorrect User");
+            throw new BadRequestException("Incorrect User id");
         }
         createTodoDto.Id = _todoRepository.Count() + 1;
         var todoEntity = _mapper.Map<Todo>(createTodoDto);
@@ -68,20 +56,14 @@ public class TodoService : ITodoService
         if (_usersRepository.SingleOrDefault(t => t.Id == putTodoDto.OwnerId) is null)
         {
             Log.Error($"Incorrect owner id -{putTodoDto.Id}");
-            throw new Exception("Incorrect User");
+            throw new BadRequestException("Incorrect User");
         }
         var todoEntity = GetById(putTodoDto.Id);
-
-        if (todoEntity is null)
-        {
-            Log.Error($"Incorrect id -{putTodoDto}");
-            throw new Exception("Incorrect User");
-        }
         _mapper.Map(putTodoDto, todoEntity);
         return _todoRepository.Update(todoEntity);
     }
 
-    public int Count(string? labelFreeText,int? ownerId)
+    public int Count(string? labelFreeText, int? ownerId)
     {
         return _todoRepository.Count(
             labelFreeText == null ? null
@@ -93,11 +75,6 @@ public class TodoService : ITodoService
     public Todo PatchIsDone(PatchIsDoneTodoDto patchIsDoneTodoDto)
     {
         var todoEntity = GetById(patchIsDoneTodoDto.Id);
-        if (todoEntity is null)
-        {
-            Log.Error($"Incorrect id -{patchIsDoneTodoDto.Id}");
-            throw new Exception("Incorrect User");
-        }
         _mapper.Map(patchIsDoneTodoDto, todoEntity);
         return _todoRepository.Update(todoEntity);
     }
@@ -105,11 +82,12 @@ public class TodoService : ITodoService
     public bool Delete(RemoveTodoDto removeTodoDto)
     {
         var todoEntity = GetById(removeTodoDto.Id);
-        if (todoEntity is null)
-        {
-            Log.Error($"Incorrect id -{removeTodoDto.Id}");
-            throw new Exception("Incorrect User");
-        }
+
         return _todoRepository.Delete(todoEntity);
+    }
+
+    Task<Todo?> ITodoService.GetByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        return _todoRepository.SingleOrDefauldAsync(p => p.Id == id, cancellationToken);
     }
 }

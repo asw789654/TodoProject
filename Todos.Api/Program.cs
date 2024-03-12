@@ -2,6 +2,9 @@ using Todos.BL;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using Serilog;
 using Serilog.Events;
+using Common.Api;
+using Common.Repositories;
+using System.Text.Json.Serialization;
 
 internal class Programm
 {
@@ -16,16 +19,27 @@ internal class Programm
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(x =>
+            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
             builder.Services.AddEndpointsApiExplorer();
+
             //builder.Services.AddScoped<TodoService>();
             //builder.Services.AddSingleton<TodoService>();
-            TodosServicesDI.AddTodosServices(builder.Services);
+            builder.Services.AddTodosServices();
+            //TodosServicesDI.AddTodosServices(builder.Services);
+
             builder.Services.AddSwaggerGen();
+
             builder.Services.AddFluentValidationAutoValidation();
+
             builder.Host.UseSerilog();
+
+            builder.Services.AddTodosDatabase(builder.Configuration);
+
             var app = builder.Build();
+
+            app.UseExceptionsHandler();
 
             if (app.Environment.IsDevelopment())
             {

@@ -11,6 +11,5 @@ namespace Todos.BL.Validators
             RuleFor(e => e.OwnerId).GreaterThan(0).WithMessage("OwnerId error");
             RuleFor(e => e.Label).MinimumLength(1).MaximumLength(20).WithMessage("Label error");
         }
-
     }
 }

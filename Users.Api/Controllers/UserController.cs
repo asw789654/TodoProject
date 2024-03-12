@@ -27,21 +27,12 @@ public class UserController : ControllerBase
     {
         var user = _userService.GetById(id);
 
-        if (user == null)
-        {
-            return NotFound($"/{id}");
-        }
-
         return Ok(user);
     }
 
     [HttpPost]
     public IActionResult AddToList(AddUserDto user)
     {
-        if (user == null)
-        {
-            return NotFound();
-        }
         var userEntity = _userService.AddToList(user);
         return Created($"/User/{userEntity.Id}", userEntity);
     }
@@ -49,20 +40,12 @@ public class UserController : ControllerBase
     [HttpPut]
     public IActionResult PutToList(UpdateUserDto user)
     {
-        if (user == null)
-        {
-            return NotFound();
-        }
         return Ok(_userService.Update(user));
     }
 
     [HttpDelete]
     public IActionResult Remove(RemoveUserDto user)
     {
-        if (user == null)
-        {
-            return NotFound();
-        }
         return Ok(_userService.Delete(user));
     }
 }
