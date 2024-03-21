@@ -59,7 +59,7 @@ public class UserService : IUserService
     {
         if (await _usersRepository.SingleOrDefaultAsync(u => u.Name == addUserDto.Name.Trim()) is not null)
         {
-            throw new BadRequestException("User login exists");
+            throw new ForbiddenException();
         }
         var userRole = (await _userRoles.SingleOrDefaultAsync(r => r.Name == "Admin", cancellationToken))!;
         //var userEntity = _mapper.Map<User>(addUserDto);
@@ -78,6 +78,11 @@ public class UserService : IUserService
         bool isAdmin = _currentUserService.CurrentUserRoles().Contains("Admin");
         var userId = _usersRepository.SingleOrDefaultAsync(e => e.Id == user.Id).Result.Id;
         var currentUserId = _currentUserService.CurrentUserId();
+        if (!isAdmin && currentUserId != userId)
+        {
+            throw new ForbiddenException();
+
+        }
         GetByIdAsync(user.Id, cancellationToken);
         var userEntity = new ApplicationUser()
         {
@@ -86,11 +91,7 @@ public class UserService : IUserService
             PasswordHash = PasswordHasher.HashPassword(user.Password)
         };
         _mapper.Map(user, userEntity);
-        if (!isAdmin && currentUserId != userId)
-        {
-            throw new BadRequestException("Access denied");
-
-        }
+        
 
         return _mapper.Map<GetUserDto>(await _usersRepository.UpdateAsync(userEntity, cancellationToken));
     }
@@ -99,6 +100,10 @@ public class UserService : IUserService
         bool isAdmin = _currentUserService.CurrentUserRoles().Contains("Admin");
         var userId = _usersRepository.SingleOrDefaultAsync(e => e.Id == user.Id).Result.Id;
         var currentUserId = _currentUserService.CurrentUserId();
+        if (!isAdmin && currentUserId != userId)
+        {
+            throw new ForbiddenException();
+        }
         GetByIdAsync(user.Id, cancellationToken);
         var userEntity = new ApplicationUser()
         {
@@ -106,10 +111,7 @@ public class UserService : IUserService
             PasswordHash = PasswordHasher.HashPassword(user.Password)
         };
         _mapper.Map(user, userEntity);
-        if (!isAdmin && currentUserId != userId)
-        {
-            throw new BadRequestException("Access denied");
-        }
+        
         return _mapper.Map<GetUserDto>(await _usersRepository.UpdateAsync(userEntity, cancellationToken));
 
     }
@@ -118,16 +120,16 @@ public class UserService : IUserService
         bool isAdmin = _currentUserService.CurrentUserRoles().Contains("Admin");
         var userId = _usersRepository.SingleOrDefaultAsync(e => e.Id == user.Id).Result.Id;
         var currentUserId = _currentUserService.CurrentUserId();
+        if (!isAdmin && currentUserId != userId)
+        {
+            throw new ForbiddenException();
+        }
         GetByIdAsync(user.Id, cancellationToken);
         var userEntity = new ApplicationUser()
         {
             Id = user.Id,
         };
-        if (!isAdmin && currentUserId != userId)
-        {
-            throw new BadRequestException("Access denied");
-        }
-
+        
         return await _usersRepository.DeleteAsync(userEntity, cancellationToken);
 
     }

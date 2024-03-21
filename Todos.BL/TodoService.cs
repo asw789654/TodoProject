@@ -45,7 +45,7 @@ public class TodoService : ITodoService
         return await _todoRepository.GetListAsync(
             offset,
             limit,
-            ownerId == null ? null : t => t.OwnerId == ownerId,
+            t => t.OwnerId == ownerId,
             labelFreeText == null ? null : t => t.Label.Contains(labelFreeText, StringComparison.InvariantCulture) && t.OwnerId == _currentUserService.CurrentUserId(),
             t => t.Id,
             false,
@@ -94,11 +94,12 @@ public class TodoService : ITodoService
     {
 
         bool isAdmin = _currentUserService.CurrentUserRoles().Contains("Admin");
+
         var userOwnerId = _todoRepository.SingleOrDefaultAsync(e => e.Id == id).Result.OwnerId;
         var currentUserId = _currentUserService.CurrentUserId();
         if (!isAdmin && currentUserId != userOwnerId)
         {
-            throw new BadRequestException("Access denied");
+            throw new ForbiddenException();
         }
         var todo = await _todoRepository.SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
         if (todo == null)
