@@ -1,5 +1,3 @@
-using Common.Api.Exceptions;
-using Common.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todos.BL;
@@ -13,12 +11,10 @@ namespace todoApi.Controllers;
 public class TodoController : ControllerBase
 {
     private readonly ITodoService _todoService;
-    private readonly ICurrentUserService _currentUserService;
 
-    public TodoController(ITodoService todoService, ICurrentUserService currentUserService)
+    public TodoController(ITodoService todoService)
     {
         _todoService = todoService;
-        _currentUserService = currentUserService;
     }
 
     [HttpGet]

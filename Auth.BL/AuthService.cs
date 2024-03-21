@@ -52,7 +52,12 @@ public class AuthService : IAuthService
         var tokenDescriptor = new JwtSecurityToken(_configuration["Jwt:Issuer"]!, _configuration["Jwt:Audience"]!, claims,
             expires: expires, signingCredentials: credentials);
         var token = new JwtSecurityTokenHandler().WriteToken(tokenDescriptor)!;
-        var refreshToken = await _refreshTokens.AddAsync(new RefreshToken() { ApplicationUserId = user.Id }, cancellationToken);
+        var refreshToken = await _refreshTokens.AddAsync(new RefreshToken() { 
+            ApplicationUserId = user.Id,
+            Id = (Int32.Parse(_refreshTokens.GetListAsync(cancellationToken: cancellationToken).
+            Result.OrderByDescending(u => u.Id).FirstOrDefault().Id)+1).ToString()
+        },  cancellationToken);
+
         return new JwtTokenDto
         {
             JwtToken = token,

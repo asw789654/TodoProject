@@ -31,7 +31,6 @@ internal class Programm
             //builder.Services.AddScoped<TodoService>();
             //builder.Services.AddSingleton<TodoService>();
             builder.Services.AddTodosServices();
-            //TodosServicesDI.AddTodosServices(builder.Services);
 
             builder.Services.AddSwaggerGen(options =>
             {

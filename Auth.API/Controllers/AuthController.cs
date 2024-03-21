@@ -39,7 +39,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("GetMyInfo")]
-    public async Task<IActionResult> GetMyInfo(CancellationToken cancellationToken)
+    public IActionResult GetMyInfo(CancellationToken cancellationToken)
     {
         var user = _currentUserService.CurrentUserName();
         return Ok(user);
@@ -47,7 +47,7 @@ public class AuthController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpGet("IAmAdmin")]
-    public async Task<IActionResult> IAmAdmin(CancellationToken cancellationToken)
+    public IActionResult IAmAdmin(CancellationToken cancellationToken)
     {
         var user = _currentUserService.CurrentUserName();
         return Ok(user);
