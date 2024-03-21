@@ -4,18 +4,21 @@ namespace Common.Repositories;
 
 public interface IRepository<TEntity> where TEntity : class, new()
 {
-    TEntity[] GetList(
+    Task<TEntity[]> GetListAsync(
         int? offset = null,
         int? limit = null,
         Expression<Func<TEntity, bool>>? filterBy = null,
         Expression<Func<TEntity, bool>>? predicate = null,
         Expression<Func<TEntity, object>>? orderBy = null,
-        bool? descending = null);
-    TEntity? SingleOrDefault(Expression<Func<TEntity, bool>>? predicate = null);
-    Task<TEntity> SingleOrDefauldAsync(Expression<Func<TEntity,bool>>? predicate = null, CancellationToken cancellationToken = default);
-    int Count(Expression<Func<TEntity, bool>>? predicate = null, 
-            Expression<Func<TEntity, bool>>? filterBy = null);
-    TEntity Add(TEntity book);
-    TEntity Update(TEntity book);
-    bool Delete(TEntity book);
+        bool? descending = null,
+        CancellationToken cancellationToken = default);
+    Task<TEntity?> SingleOrDefaultAsync(Expression<Func<TEntity,bool>>? predicate = null, CancellationToken cancellationToken = default);
+    Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default);
+    Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default);
+    Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate = null, 
+            Expression<Func<TEntity, bool>>? filterBy = null,
+            CancellationToken cancellationToken = default);
+    Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default);
+    Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(TEntity entity, CancellationToken cancellationToken = default);
 }

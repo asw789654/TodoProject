@@ -22,6 +22,81 @@ namespace Common.Repositories.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Common.Domain.ApplicationUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("ApplicationUsers");
+                });
+
+            modelBuilder.Entity("Common.Domain.ApplicationUserApplicationRole", b =>
+                {
+                    b.Property<int>("ApplicationUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ApplicationUserRoleId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ApplicationUserId", "ApplicationUserRoleId");
+
+                    b.HasIndex("ApplicationUserRoleId");
+
+                    b.ToTable("ApplicationUserApplicationRole");
+                });
+
+            modelBuilder.Entity("Common.Domain.ApplicationUserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApplicationUserRoles");
+                });
+
+            modelBuilder.Entity("Common.Domain.RefreshToken", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<int>("ApplicationUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("Common.Domain.Todo", b =>
                 {
                     b.Property<int>("Id")
@@ -51,30 +126,42 @@ namespace Common.Repositories.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Todo");
+                    b.ToTable("Tados");
                 });
 
-            modelBuilder.Entity("Common.Domain.User", b =>
+            modelBuilder.Entity("Common.Domain.ApplicationUserApplicationRole", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                    b.HasOne("Common.Domain.ApplicationUser", "ApplicationUser")
+                        .WithMany("Roles")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.HasOne("Common.Domain.ApplicationUserRole", "ApplicationUserRole")
+                        .WithMany("Users")
+                        .HasForeignKey("ApplicationUserRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.Navigation("ApplicationUser");
 
-                    b.HasKey("Id");
+                    b.Navigation("ApplicationUserRole");
+                });
 
-                    b.ToTable("User");
+            modelBuilder.Entity("Common.Domain.RefreshToken", b =>
+                {
+                    b.HasOne("Common.Domain.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Common.Domain.Todo", b =>
                 {
-                    b.HasOne("Common.Domain.User", "User")
+                    b.HasOne("Common.Domain.ApplicationUser", "User")
                         .WithMany("Todos")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -83,9 +170,16 @@ namespace Common.Repositories.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Common.Domain.User", b =>
+            modelBuilder.Entity("Common.Domain.ApplicationUser", b =>
                 {
+                    b.Navigation("Roles");
+
                     b.Navigation("Todos");
+                });
+
+            modelBuilder.Entity("Common.Domain.ApplicationUserRole", b =>
+                {
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

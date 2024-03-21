@@ -1,7 +1,6 @@
-﻿namespace Users.BL.DTO
+﻿namespace Users.BL.DTO;
+
+public class RemoveUserDto
 {
-    public class RemoveUserDto
-    {
-        public int Id { get; set; }
-    }
+    public int Id { get; set; }
 }

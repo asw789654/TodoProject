@@ -5,6 +5,10 @@ using Serilog.Events;
 using Common.Api;
 using Common.Repositories;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
 
 internal class Programm
 {
@@ -29,14 +33,61 @@ internal class Programm
             builder.Services.AddTodosServices();
             //TodosServicesDI.AddTodosServices(builder.Services);
 
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = """
+                                  JWT Authorization header using the Bearer scheme \r\n\r\n
+                                  Enter 'Bearer' [space] and then token is the text input below.
+                                  \r\n\r\nExample: 'Bearer 12345abcdef'
+                                  """,
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                        Scheme = "oauth2",
+                        Name = "Bearer",
+                        In = ParameterLocation.Header
+                        },
+                        new List<string>()
+                    }
+                    });
+            });
 
             builder.Services.AddFluentValidationAutoValidation();
 
             builder.Host.UseSerilog();
 
             builder.Services.AddTodosDatabase(builder.Configuration);
-
+            builder.Services.AddAuthorization();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            };
+        });
             var app = builder.Build();
 
             app.UseExceptionsHandler();

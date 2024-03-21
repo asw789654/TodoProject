@@ -1,17 +1,21 @@
-﻿using Common.Domain;
-using Users.BL.DTO;
+﻿using Users.BL.DTO;
 
 namespace Users.Services
 {
     public interface IUserService
     {
-        IReadOnlyCollection<User> GetList(int? offset, string labelFreeText, int? limit = 10);
-        public User? GetById(int id);
-        public User? AddToList(AddUserDto todo);
+        public Task<IReadOnlyCollection<GetUserDto>> GetListAsync(
+            int? offset, 
+            string labelFreeText, 
+            int? limit = 10, 
+            CancellationToken cancellationToken = default);
+        public Task<GetUserDto?> GetByIdAsync(int id,CancellationToken cancellationToken = default);
+        public Task<GetUserDto?> AddToListAsync(AddUserDto user, CancellationToken cancellationToken = default);
 
-        public User Update(UpdateUserDto todo);
+        public Task<GetUserDto> UpdateAsync(UpdateUserDto user, CancellationToken cancellationToken = default);
 
-        public bool Delete(RemoveUserDto user);
-
+        public Task<bool> DeleteAsync(RemoveUserDto user, CancellationToken cancellationToken = default);
+        public Task<GetUserDto> UpdatePasswordAsync(UpdateUserPasswordDto user, CancellationToken cancellationToken = default);
+        
     }
 }

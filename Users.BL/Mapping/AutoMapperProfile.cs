@@ -2,13 +2,15 @@
 using Common.Domain;
 using Users.BL.DTO;
 
-namespace Todos.BL.Mapping;
+namespace Users.BL.Mapping;
 
 public class AutoMapperProfile : Profile
 {
     public AutoMapperProfile()
     {
-        CreateMap<AddUserDto,User>();
-        CreateMap<UpdateUserDto, User>();
+        CreateMap<AddUserDto,ApplicationUser>();
+        CreateMap<UpdateUserDto, ApplicationUser>();
+        CreateMap<UpdateUserPasswordDto, ApplicationUser>();
+        CreateMap<ApplicationUser,GetUserDto>();
     }
 }
