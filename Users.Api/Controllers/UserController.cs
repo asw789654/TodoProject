@@ -21,6 +21,7 @@ public class UserController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetList(int? limit, int? offset, string? labelFreeText, CancellationToken cancellationToken)
     {
+
         var users = await _userService.GetListAsync(offset, labelFreeText, limit, cancellationToken);
         return Ok(users);
     }

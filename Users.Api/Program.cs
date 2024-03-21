@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Common.Api.Services;
 
 internal class Programm
 {
@@ -28,6 +29,7 @@ internal class Programm
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddUsersServices();
+            builder.Services.AddTransient<ICurrentUserService, CurrentUserService>();
             //builder.Services.AddScoped<TodoService>();
             //builder.Services.AddSingleton<TodoService>();
             builder.Services.AddSwaggerGen(options =>
@@ -64,6 +66,7 @@ internal class Programm
                     });
             });
 
+            
             builder.Services.AddFluentValidationAutoValidation();
             builder.Host.UseSerilog();
             builder.Services.AddAuthorization();

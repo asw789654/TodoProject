@@ -13,12 +13,12 @@ public class UserService : IUserService
 {
     private readonly IRepository<ApplicationUser> _usersRepository;
     private readonly IRepository<ApplicationUserRole> _userRoles;
-    private readonly CurrentUserService _currentUserService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
-    
+
     public UserService(
-        CurrentUserService currentUserService,
-        IRepository<ApplicationUser> usersRepository, 
+        ICurrentUserService currentUserService,
+        IRepository<ApplicationUser> usersRepository,
         IRepository<ApplicationUserRole> userRoles,
         IMapper mapper)
     {
@@ -34,7 +34,7 @@ public class UserService : IUserService
         int? limit = 10,
         CancellationToken cancellationToken = default)
     {
-        return _mapper.Map<IReadOnlyCollection<GetUserDto>>( await _usersRepository.GetListAsync(
+        return _mapper.Map<IReadOnlyCollection<GetUserDto>>(await _usersRepository.GetListAsync(
             offset,
             limit,
             nameFreeText == null ? null : u => u.Name.Contains(nameFreeText, StringComparison.InvariantCulture),
@@ -57,17 +57,17 @@ public class UserService : IUserService
 
     public async Task<GetUserDto?> AddToListAsync(AddUserDto addUserDto, CancellationToken cancellationToken = default)
     {
-        if(await _usersRepository.SingleOrDefaultAsync(u => u.Name == addUserDto.Name.Trim()) is not null)
+        if (await _usersRepository.SingleOrDefaultAsync(u => u.Name == addUserDto.Name.Trim()) is not null)
         {
             throw new BadRequestException("User login exists");
         }
-        var userRole = (await _userRoles.SingleOrDefaultAsync(r => r.Name == "Admin",cancellationToken))!;
+        var userRole = (await _userRoles.SingleOrDefaultAsync(r => r.Name == "Admin", cancellationToken))!;
         //var userEntity = _mapper.Map<User>(addUserDto);
         var userEntity = new ApplicationUser()
         {
             Name = addUserDto.Name,
             PasswordHash = PasswordHasher.HashPassword(addUserDto.Password),
-            Roles = new[] { new ApplicationUserApplicationRole() {ApplicationUserRoleId = userRole.Id } }
+            Roles = new[] { new ApplicationUserApplicationRole() { ApplicationUserRoleId = userRole.Id } }
         };
         userEntity.Id = _usersRepository.CountAsync(cancellationToken: cancellationToken).Result + 1;
         return _mapper.Map<GetUserDto>(await _usersRepository.AddAsync(userEntity, cancellationToken));
@@ -75,6 +75,9 @@ public class UserService : IUserService
 
     public async Task<GetUserDto> UpdateAsync(UpdateUserDto user, CancellationToken cancellationToken = default)
     {
+        bool isAdmin = _currentUserService.CurrentUserRoles().Contains("Admin");
+        var userId = _usersRepository.SingleOrDefaultAsync(e => e.Id == user.Id).Result.Id;
+        var currentUserId = _currentUserService.CurrentUserId();
         GetByIdAsync(user.Id, cancellationToken);
         var userEntity = new ApplicationUser()
         {
@@ -83,22 +86,19 @@ public class UserService : IUserService
             PasswordHash = PasswordHasher.HashPassword(user.Password)
         };
         _mapper.Map(user, userEntity);
-        if (_currentUserService.CurrentUserRoles().Contains("Admin"))
-        {
-            return _mapper.Map<GetUserDto>(await _usersRepository.UpdateAsync(userEntity, cancellationToken));
-        }
-        else if (_currentUserService.CurrentUserId() == _usersRepository.SingleOrDefaultAsync(e => e.Id == user.Id).Result.Id)
-        {
-            return _mapper.Map<GetUserDto>(await _usersRepository.UpdateAsync(userEntity, cancellationToken));
-        }
-        else
+        if (!isAdmin && currentUserId != userId)
         {
             throw new BadRequestException("Access denied");
+
         }
-        
+
+        return _mapper.Map<GetUserDto>(await _usersRepository.UpdateAsync(userEntity, cancellationToken));
     }
     public async Task<GetUserDto> UpdatePasswordAsync(UpdateUserPasswordDto user, CancellationToken cancellationToken = default)
     {
+        bool isAdmin = _currentUserService.CurrentUserRoles().Contains("Admin");
+        var userId = _usersRepository.SingleOrDefaultAsync(e => e.Id == user.Id).Result.Id;
+        var currentUserId = _currentUserService.CurrentUserId();
         GetByIdAsync(user.Id, cancellationToken);
         var userEntity = new ApplicationUser()
         {
@@ -106,39 +106,30 @@ public class UserService : IUserService
             PasswordHash = PasswordHasher.HashPassword(user.Password)
         };
         _mapper.Map(user, userEntity);
-        if (_currentUserService.CurrentUserRoles().Contains("Admin"))
-        {
-            return _mapper.Map<GetUserDto>(await _usersRepository.UpdateAsync(userEntity, cancellationToken));
-        }
-        else if (_currentUserService.CurrentUserId() == _usersRepository.SingleOrDefaultAsync(e => e.Id == user.Id).Result.Id)
-        {
-            return _mapper.Map<GetUserDto>(await _usersRepository.UpdateAsync(userEntity, cancellationToken));
-        }
-        else
+        if (!isAdmin && currentUserId != userId)
         {
             throw new BadRequestException("Access denied");
         }
+        return _mapper.Map<GetUserDto>(await _usersRepository.UpdateAsync(userEntity, cancellationToken));
 
     }
     public async Task<bool> DeleteAsync(RemoveUserDto user, CancellationToken cancellationToken = default)
     {
+        bool isAdmin = _currentUserService.CurrentUserRoles().Contains("Admin");
+        var userId = _usersRepository.SingleOrDefaultAsync(e => e.Id == user.Id).Result.Id;
+        var currentUserId = _currentUserService.CurrentUserId();
         GetByIdAsync(user.Id, cancellationToken);
         var userEntity = new ApplicationUser()
         {
             Id = user.Id,
         };
-        if (_currentUserService.CurrentUserRoles().Contains("Admin"))
-        {
-            return await _usersRepository.DeleteAsync(userEntity, cancellationToken);
-        }
-        else if (_currentUserService.CurrentUserId() == _usersRepository.SingleOrDefaultAsync(e => e.Id == user.Id).Result.Id)
-        {
-            return await _usersRepository.DeleteAsync(userEntity, cancellationToken);
-        }
-        else
+        if (!isAdmin && currentUserId != userId)
         {
             throw new BadRequestException("Access denied");
-        }        
+        }
+
+        return await _usersRepository.DeleteAsync(userEntity, cancellationToken);
+
     }
 
 }

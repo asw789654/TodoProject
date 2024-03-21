@@ -13,9 +13,9 @@ public class TodoService : ITodoService
     private readonly IRepository<Todo> _todoRepository;
     private readonly IRepository<ApplicationUser> _usersRepository;
     private readonly IMapper _mapper;
-    private readonly CurrentUserService _currentUserService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public TodoService(IMapper mapper, IRepository<Todo> todoRepositity, IRepository<ApplicationUser> userRepository, CurrentUserService currentUserService)
+    public TodoService(IMapper mapper, IRepository<Todo> todoRepositity, IRepository<ApplicationUser> userRepository, ICurrentUserService currentUserService)
     {
         _mapper = mapper;
         _usersRepository = userRepository;
@@ -30,7 +30,8 @@ public class TodoService : ITodoService
         int? limit = 10,
         CancellationToken cancellationToken = default)
     {
-        if (_currentUserService.CurrentUserRoles().Contains("Admin"))
+        bool isAdmin = _currentUserService.CurrentUserRoles().Contains("Admin");
+        if (isAdmin)
         {
             return await _todoRepository.GetListAsync(
             offset,
@@ -53,43 +54,17 @@ public class TodoService : ITodoService
 
     public async Task<Todo?> AddToListAsync(CreateTodoDto createTodoDto, CancellationToken cancellationToken = default)
     {
-        if (_usersRepository.SingleOrDefaultAsync(t => t.Id == createTodoDto.OwnerId, cancellationToken) is null)
-        {
-            Log.Error($"Incorrect owner id -{createTodoDto}");
-            throw new BadRequestException("Incorrect User id");
-        }
         createTodoDto.Id = _todoRepository.CountAsync(cancellationToken: cancellationToken).Result + 1;
         var todoEntity = _mapper.Map<Todo>(createTodoDto);
-        if (_currentUserService.CurrentUserRoles().Contains("Admin"))
-        {
-            return await _todoRepository.AddAsync(todoEntity, cancellationToken);
-        }
         todoEntity.OwnerId = _currentUserService.CurrentUserId();
         return await _todoRepository.AddAsync(todoEntity, cancellationToken);
     }
 
     public async Task<Todo?> UpdateAsync(PutTodoDto putTodoDto, CancellationToken cancellationToken = default)
     {
-        if (_usersRepository.SingleOrDefaultAsync(t => t.Id == putTodoDto.OwnerId, cancellationToken) is null)
-        {
-            Log.Error($"Incorrect owner id -{putTodoDto.Id}");
-            throw new BadRequestException("Incorrect User");
-        }
         var todoEntity = GetByIdAsync(putTodoDto.Id, cancellationToken).Result;
 
-        _mapper.Map(putTodoDto, todoEntity);
-        if (_currentUserService.CurrentUserRoles().Contains("Admin"))
-        {
-            return await _todoRepository.UpdateAsync(todoEntity, cancellationToken);
-        }
-        else if (_currentUserService.CurrentUserId() == putTodoDto.OwnerId)
-        {
-            return await _todoRepository.UpdateAsync(todoEntity, cancellationToken);
-        }
-        else
-        {
-            throw new BadRequestException("Access denied");
-        }
+        return await _todoRepository.UpdateAsync(todoEntity, cancellationToken);
     }
 
     public async Task<int> CountAsync(string? labelFreeText, int? ownerId, CancellationToken cancellationToken = default)
@@ -104,59 +79,34 @@ public class TodoService : ITodoService
     {
         var todoEntity = GetByIdAsync(patchIsDoneTodoDto.Id, cancellationToken).Result;
         _mapper.Map(patchIsDoneTodoDto, todoEntity);
-        if (_currentUserService.CurrentUserRoles().Contains("Admin"))
-        {
-            return await _todoRepository.UpdateAsync(todoEntity, cancellationToken);
-        }
-        else if (_currentUserService.CurrentUserId() == _todoRepository.SingleOrDefaultAsync(e => e.Id == patchIsDoneTodoDto.Id).Result.OwnerId)
-        {
-            return await _todoRepository.UpdateAsync(todoEntity, cancellationToken);
-        }
-        else
-        {
-            throw new BadRequestException("Access denied");
-        }
-        
+
+        return await _todoRepository.UpdateAsync(todoEntity, cancellationToken);
     }
 
     public async Task<bool> DeleteAsync(RemoveTodoDto removeTodoDto, CancellationToken cancellationToken = default)
     {
         var todoEntity = GetByIdAsync(removeTodoDto.Id, cancellationToken).Result;
 
-        if (_currentUserService.CurrentUserRoles().Contains("Admin"))
-        {
-            return await _todoRepository.DeleteAsync(todoEntity, cancellationToken);
-        }
-        else if (_currentUserService.CurrentUserId() == _todoRepository.SingleOrDefaultAsync(e => e.Id == removeTodoDto.Id).Result.OwnerId)
-        {
-            return await _todoRepository.DeleteAsync(todoEntity, cancellationToken);
-        }
-        else
-        {
-            throw new BadRequestException("Access denied");
-        }  
+        return await _todoRepository.DeleteAsync(todoEntity, cancellationToken);
     }
 
     public async Task<Todo?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
+
+        bool isAdmin = _currentUserService.CurrentUserRoles().Contains("Admin");
+        var userOwnerId = _todoRepository.SingleOrDefaultAsync(e => e.Id == id).Result.OwnerId;
+        var currentUserId = _currentUserService.CurrentUserId();
+        if (!isAdmin && currentUserId != userOwnerId)
+        {
+            throw new BadRequestException("Access denied");
+        }
         var todo = await _todoRepository.SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
         if (todo == null)
         {
             Log.Error($"Incorrect id -{todo}");
             throw new NotFoundException(new { Id = id });
         }
-        if (_currentUserService.CurrentUserRoles().Contains("Admin"))
-        {
-            return todo;
-        }
-        else if (_currentUserService.CurrentUserId() == _todoRepository.SingleOrDefaultAsync(e => e.Id == id).Result.OwnerId)
-        {
-            return todo;
-        }
-        else
-        {
-            throw new BadRequestException("Access denied");
-        }
 
+        return todo;
     }
 }

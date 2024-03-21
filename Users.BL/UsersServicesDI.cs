@@ -2,6 +2,7 @@
 using Common.Domain;
 using Common.Repositories;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Users.BL.Mapping;
@@ -15,8 +16,8 @@ public static class UsersServicesDI
     {
         services.AddAutoMapper(typeof(AutoMapperProfile));   
         services.AddHttpContextAccessor();
-        services.AddTransient<ICurrentUserService, CurrentUserService>();
         services.AddTransient<IUserService, UserService>();
+        services.AddTransient<ICurrentUserService, CurrentUserService>();
         services.AddTransient<IRepository<ApplicationUserApplicationRole>, SqlServerBaseRepository<ApplicationUserApplicationRole>>();
         services.AddTransient<IRepository<ApplicationUserRole>, SqlServerBaseRepository<ApplicationUserRole>>();
         services.AddTransient<IRepository<Todo>, SqlServerBaseRepository<Todo>>();

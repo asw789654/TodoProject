@@ -10,6 +10,7 @@ public class CurrentUserService : ICurrentUserService
     {
         _httpContextAccessor = httpContextAccessor;
     }
+
     public int CurrentUserId()
     {
         return Int32.Parse(_httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
