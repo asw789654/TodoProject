@@ -1,6 +1,5 @@
 ﻿using Common.Domain;
 using MediatR;
-using Todos.Application.DTO;
 
 namespace Todos.Application.Query.GetById;
 

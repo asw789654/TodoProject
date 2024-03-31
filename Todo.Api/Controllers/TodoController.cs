@@ -19,14 +19,17 @@ public class TodoController : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetList(
-        [AsParameters] GetTodoListQuery getTodoListQuery,
-       // GetTodoCountQuery getTodoCountQuery,
+        [FromQuery] GetTodoListQuery getTodoListQuery,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
         var todos = await mediator.Send(getTodoListQuery, cancellationToken);
-        //var count = await mediator.Send(getTodoCountQuery, cancellationToken);
-        //HttpContext.Response.Headers.Append("X-Tatal-Count", count.ToString());
+        var count = await mediator.Send(new GetTodoCountQuery() 
+        { LabelFreeText = getTodoListQuery.LabelFreeText, 
+            OwnerId = getTodoListQuery.OwnerId
+        }, cancellationToken);
+
+        HttpContext.Response.Headers.Append("X-Tatal-Count", count.ToString());
         return Ok(todos);
     }
 

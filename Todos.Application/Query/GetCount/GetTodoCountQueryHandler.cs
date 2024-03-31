@@ -26,7 +26,7 @@ public class GetTodoCountQueryHandler : IRequestHandler<GetTodoCountQuery, int>
         {
             ReferenceHandler = ReferenceHandler.IgnoreCycles
         });
-        if (!_memoryCache.TryGetValue(cashKey, out int result))
+        if (_memoryCache.TryGetValue(cashKey, out int result))
         {
             return result;
         }

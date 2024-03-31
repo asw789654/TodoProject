@@ -33,7 +33,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, GetUser
             ReferenceHandler = ReferenceHandler.IgnoreCycles
         });
 
-        if (!_memoryCache.TryGetValue(cashKey, out GetUserDto? result))
+        if (_memoryCache.TryGetValue(cashKey, out GetUserDto? result))
         {
             return result;
         }

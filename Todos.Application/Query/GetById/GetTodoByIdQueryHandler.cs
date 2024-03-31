@@ -43,7 +43,7 @@ public class GetTodoByIdQueryHandler : IRequestHandler<GetTodoByIdQuery, Todo>
         {
             ReferenceHandler = ReferenceHandler.IgnoreCycles
         });
-        if (!_memoryCache.TryGetValue(cashKey, out Todo? result))
+        if (_memoryCache.TryGetValue(cashKey, out Todo? result))
         {
             return result;
         }

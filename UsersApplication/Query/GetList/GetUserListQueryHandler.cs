@@ -29,7 +29,7 @@ public class GetUserListQueryHandler : IRequestHandler<GetUserListQuery, IReadOn
         {
             ReferenceHandler = ReferenceHandler.IgnoreCycles
         });
-        if (!_memoryCache.TryGetValue(cashKey, out IReadOnlyCollection<GetUserDto>? result))
+        if (_memoryCache.TryGetValue(cashKey, out IReadOnlyCollection<GetUserDto>? result))
         {
             return result;
         }

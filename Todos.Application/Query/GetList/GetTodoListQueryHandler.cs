@@ -32,7 +32,7 @@ public class GetTodoListQueryHandler : IRequestHandler<GetTodoListQuery, IReadOn
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles
             });
-            if (!_memoryCache.TryGetValue(cashKey, out IReadOnlyCollection<Todo>? result))
+            if (_memoryCache.TryGetValue(cashKey, out IReadOnlyCollection<Todo>? result))
             {
                 return result;
             }
@@ -59,7 +59,7 @@ public class GetTodoListQueryHandler : IRequestHandler<GetTodoListQuery, IReadOn
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles
             });
-            if (!_memoryCache.TryGetValue(cashKey, out IReadOnlyCollection<Todo>? result))
+            if (_memoryCache.TryGetValue(cashKey, out IReadOnlyCollection<Todo>? result))
             {
                 return result;
             }

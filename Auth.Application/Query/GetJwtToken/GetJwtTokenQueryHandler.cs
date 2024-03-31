@@ -54,9 +54,9 @@ public class GetJwtTokenQueryHandler : IRequestHandler<GetJwtTokenQuery, JwtToke
         var refreshToken = await _refreshTokens.AddAsync(new RefreshToken()
         {
             ApplicationUserId = user.Id,
-            Id = (Int32.Parse(_refreshTokens.GetListAsync(cancellationToken: cancellationToken).
-            Result.OrderByDescending(u => u.Id).FirstOrDefault().Id) + 1).ToString()
-        }, cancellationToken);
+            Id = Int32.Parse(_refreshTokens.GetListAsync(cancellationToken: cancellationToken).
+            Result.Select(t => t.Id).Max() + 1).ToString()
+        },cancellationToken);
 
         return new JwtTokenDto
         {
