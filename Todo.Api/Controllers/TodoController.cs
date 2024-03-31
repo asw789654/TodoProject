@@ -19,7 +19,7 @@ public class TodoController : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetList(
-        [FromQuery] GetTodoListQuery getTodoListQuery,
+        [AsParameters] GetTodoListQuery getTodoListQuery,
        // GetTodoCountQuery getTodoCountQuery,
         IMediator mediator,
         CancellationToken cancellationToken)

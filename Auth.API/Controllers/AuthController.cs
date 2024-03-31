@@ -22,7 +22,7 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     [HttpPost("CreateJwtToken")]
     public async Task<IActionResult> CreateJwtToken(
-        GetJwtTokenQuery getJwtTokenQuery,
+        [FromQuery] GetJwtTokenQuery getJwtTokenQuery,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
@@ -33,7 +33,7 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     [HttpPost("CreateJwtTokenByRefreshToken")]
     public async Task<IActionResult> CreateJwtTokenByRefreshToken(
-        GetJwtTokenByRefreshTokenQuery getJwtTokenByRefreshTokenQuery, 
+        [FromQuery] GetJwtTokenByRefreshTokenQuery getJwtTokenByRefreshTokenQuery, 
         IMediator mediator,
         CancellationToken cancellationToken)
     {

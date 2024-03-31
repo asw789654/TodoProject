@@ -19,7 +19,7 @@ public class UserController : ControllerBase
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetList(
-        GetUserListQuery getUserlistQuery,
+        [FromQuery]GetUserListQuery getUserlistQuery,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
@@ -31,7 +31,7 @@ public class UserController : ControllerBase
     [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetByIdAsync(
-        GetUserByIdQuery getUserByIdQuery,
+        [FromQuery] GetUserByIdQuery getUserByIdQuery,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
@@ -42,7 +42,7 @@ public class UserController : ControllerBase
 
     [HttpPost]
     public async Task<IActionResult> AddToListAsync(
-        AddUserCommand user,
+        [FromBody] AddUserCommand user,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
@@ -52,7 +52,7 @@ public class UserController : ControllerBase
 
     [HttpPut]
     public async Task<IActionResult> PutToListAsync(
-        UpdateUserCommand user,
+        [FromBody] UpdateUserCommand user,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
@@ -61,7 +61,7 @@ public class UserController : ControllerBase
 
     [HttpDelete]
     public async Task<IActionResult> RemoveAsync(
-        DeleteUserCommand user,
+        [FromBody] DeleteUserCommand user,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
@@ -70,7 +70,7 @@ public class UserController : ControllerBase
 
     [HttpPut("{id}/Password")]
     public async Task<IActionResult> PutPasswordToListAsync(
-        UpdateUserPasswordCommand user,
+        [FromBody] UpdateUserPasswordCommand user,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
