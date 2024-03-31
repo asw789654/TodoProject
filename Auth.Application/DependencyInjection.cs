@@ -2,6 +2,7 @@
 using Common.Application.Abstractions.Persistence;
 using Common.Domain;
 using Common.Persistence;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -15,6 +16,7 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddTransient<IRepository<RefreshToken>, SqlServerBaseRepository<RefreshToken>>();
         services.AddTransient<IRepository<ApplicationUser>, SqlServerBaseRepository<ApplicationUser>>();
+        services.AddValidatorsFromAssemblies(new[] { Assembly.GetExecutingAssembly() }, includeInternalTypes: true);
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         return services;
     }

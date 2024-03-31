@@ -19,7 +19,7 @@ public class TodoController : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetList(
-        GetTodoListQuery getTodoListQuery,
+        [FromQuery] GetTodoListQuery getTodoListQuery,
        // GetTodoCountQuery getTodoCountQuery,
         IMediator mediator,
         CancellationToken cancellationToken)
@@ -32,7 +32,7 @@ public class TodoController : ControllerBase
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetByIdAsync(
-        GetTodoByIdQuery getTodoByIdQuery,
+        [FromQuery] GetTodoByIdQuery getTodoByIdQuery,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
@@ -43,7 +43,7 @@ public class TodoController : ControllerBase
 
     [HttpGet("{id}/IsDone")]
     public async Task<IActionResult> GetIsDoneByIdAsync(
-        GetTodoByIdQuery getTodoByIdQuery,
+        [FromQuery] GetTodoByIdQuery getTodoByIdQuery,
         IMediator mediator,
         CancellationToken cancellationToken)
     {
@@ -52,7 +52,7 @@ public class TodoController : ControllerBase
     }
     [HttpPost]
     public async Task<IActionResult> AddToListAsync(
-        AddTodoToListCommand todo, 
+        [FromBody] AddTodoToListCommand todo, 
         IMediator mediator,
         CancellationToken cancellationToken)
     {
@@ -62,7 +62,7 @@ public class TodoController : ControllerBase
 
     [HttpPut]
     public async Task<IActionResult> PutToListAsync(
-        UpdateTodoCommand todo, 
+        [FromBody] UpdateTodoCommand todo, 
         IMediator mediator,
         CancellationToken cancellationToken)
     {
@@ -71,7 +71,7 @@ public class TodoController : ControllerBase
 
     [HttpPatch]
     public async Task<IActionResult> PatchIsDoneAsync(
-        PatchTodoIsDoneCommand todo, 
+        [FromBody] PatchTodoIsDoneCommand todo, 
         IMediator mediator, 
         CancellationToken cancellationToken)
     {
@@ -80,7 +80,7 @@ public class TodoController : ControllerBase
 
     [HttpDelete]
     public async Task<IActionResult> DeleteAsync(
-        DeleteTodoCommand todo, 
+        [FromBody] DeleteTodoCommand todo, 
         IMediator mediator, 
         CancellationToken cancellationToken)
     {
