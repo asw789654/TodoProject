@@ -7,13 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.9.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.4.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.4.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common.Api\Common.Api.csproj" />
-    <ProjectReference Include="..\Common.Repositories\Common.Repositories.csproj" />
+    <ProjectReference Include="..\Common.Application\Common.Application.csproj" />
+    <ProjectReference Include="..\Common.Repositories\Common.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

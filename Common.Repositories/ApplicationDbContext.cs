@@ -1,13 +1,13 @@
 ﻿using Common.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Common.Repositories;
+namespace Common.Persistence;
 
 public class ApplicationDbContext : DbContext
 {
-    public DbSet<Todo> Tados { get; set; } 
+    public DbSet<Todo> Tados { get; set; }
     public DbSet<ApplicationUser> ApplicationUsers { get; set; }
-    public DbSet<ApplicationUserRole> ApplicationUserRoles{ get; set; }
+    public DbSet<ApplicationUserRole> ApplicationUserRoles { get; set; }
     public DbSet<ApplicationUserApplicationRole> ApplicationUserApplicationRole { get; set; }
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -30,7 +30,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<ApplicationUser>().HasIndex(u => u.Name).IsUnique();
         modelBuilder.Entity<ApplicationUser>().Navigation(e => e.Roles).AutoInclude();
         modelBuilder.Entity<ApplicationUserApplicationRole>().Navigation(n => n.ApplicationUserRole).AutoInclude();
-        
+
         modelBuilder.Entity<RefreshToken>().HasKey(u => u.Id);
         modelBuilder.Entity<RefreshToken>().Property(u => u.Id).HasDefaultValueSql("uuid_generate_v4()");
         modelBuilder.Entity<RefreshToken>()
@@ -38,9 +38,10 @@ public class ApplicationDbContext : DbContext
             .WithMany().HasForeignKey(e => e.ApplicationUserId);
 
         modelBuilder.Entity<ApplicationUserApplicationRole>().HasKey(c => new
-            { 
-                c.ApplicationUserId, c.ApplicationUserRoleId
-            });
+        {
+            c.ApplicationUserId,
+            c.ApplicationUserRoleId
+        });
 
         modelBuilder.Entity<ApplicationUser>().
             HasMany(u => u.Roles).

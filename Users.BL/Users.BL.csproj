@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Auth.BL\Auth.BL.csproj" />
     <ProjectReference Include="..\Common.Api\Common.Api.csproj" />
+    <ProjectReference Include="..\Common.Application\Common.Application.csproj" />
     <ProjectReference Include="..\Common.Domain\Common.Domain.csproj" />
     <ProjectReference Include="..\Common.Repositories\Common.Repositories.csproj" />
     <ProjectReference Include="..\Todos.Domain\Todos.Domain.csproj" />

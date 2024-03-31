@@ -1,10 +1,8 @@
 ﻿using Common.Api.Services;
-using Common.Domain;
-using Common.Repositories;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using Todos.BL.Mapping;
+using Users.Application.Mapping;
 
 namespace Todos.BL;
 
@@ -15,10 +13,8 @@ public static class TodosServicesDI
         services.AddAutoMapper(typeof(AutoMapperProfile));
         services.AddHttpContextAccessor();
         services.AddTransient<ICurrentUserService, CurrentUserService>();
-        services.AddTransient<ITodoService, TodoService>();
-        services.AddTransient<IRepository<Todo>, SqlServerBaseRepository<Todo>>();
-        services.AddTransient<IRepository<ApplicationUser>, SqlServerBaseRepository<ApplicationUser>>();
         services.AddValidatorsFromAssemblies(new[] { Assembly.GetExecutingAssembly() }, includeInternalTypes: true);
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         return services;
     }
 }

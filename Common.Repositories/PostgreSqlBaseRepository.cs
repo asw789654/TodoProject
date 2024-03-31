@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using Common.Application.Abstractions.Persistence;
 
-namespace Common.Repositories;
+namespace Common.Persistence;
 
 public class SqlServerBaseRepository<TEntity> : IRepository<TEntity> where TEntity : class, new()
 {

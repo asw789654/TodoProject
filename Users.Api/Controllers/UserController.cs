@@ -1,62 +1,79 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Users.BL.DTO;
-using Users.Services;
+using Users.Application.Commands.AddUser;
+using Users.Application.Commands.Delete;
+using Users.Application.Commands.Update;
+using Users.Application.Commands.UpdatePassword;
+using Users.Application.Query.GetById;
+using Users.Application.Query.GetList;
 
-namespace todoApi.Controllers;
+namespace Users.Api.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly IUserService _userService;
-    public UserController(IUserService userService)
-    {
-        _userService = userService;
-    }
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> GetList(int? limit, int? offset, string? labelFreeText, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetList(
+        GetUserListQuery getUserlistQuery,
+        IMediator mediator,
+        CancellationToken cancellationToken)
     {
 
-        var users = await _userService.GetListAsync(offset, labelFreeText, limit, cancellationToken);
+        var users = await mediator.Send(getUserlistQuery, cancellationToken);
         return Ok(users);
     }
 
     [AllowAnonymous]
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetByIdAsync(
+        GetUserByIdQuery getUserByIdQuery,
+        IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        var user = await _userService.GetByIdAsync(id, cancellationToken);
+        var user = await mediator.Send(getUserByIdQuery, cancellationToken);
 
         return Ok(user);
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddToListAsync(AddUserDto user, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddToListAsync(
+        AddUserCommand user,
+        IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        var userEntity = await _userService.AddToListAsync(user, cancellationToken);
+        var userEntity = await mediator.Send(user, cancellationToken);
         return Created($"/User/{userEntity.Id}", userEntity);
     }
 
     [HttpPut]
-    public async Task<IActionResult> PutToListAsync(UpdateUserDto user, CancellationToken cancellationToken)
+    public async Task<IActionResult> PutToListAsync(
+        UpdateUserCommand user,
+        IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        return Ok(await _userService.UpdateAsync(user, cancellationToken));
+        return Ok(await mediator.Send(user, cancellationToken));
     }
 
     [HttpDelete]
-    public async Task<IActionResult> RemoveAsync(RemoveUserDto user, CancellationToken cancellationToken)
+    public async Task<IActionResult> RemoveAsync(
+        DeleteUserCommand user,
+        IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        return Ok(await _userService.DeleteAsync(user, cancellationToken));
+        return Ok(await mediator.Send(user, cancellationToken));
     }
 
     [HttpPut("{id}/Password")]
-    public async Task<IActionResult> PutPasswordToListAsync(UpdateUserPasswordDto user, CancellationToken cancellationToken)
+    public async Task<IActionResult> PutPasswordToListAsync(
+        UpdateUserPasswordCommand user,
+        IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        return Ok(await _userService.UpdatePasswordAsync(user, cancellationToken));
+        return Ok(await mediator.Send(user, cancellationToken));
     }
 }

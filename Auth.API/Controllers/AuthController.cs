@@ -1,10 +1,9 @@
-﻿using Auth.BL;
-using Auth.BL.DTO;
+﻿using Auth.Application.Query.GetJwtToken;
+using Auth.Application.Query.GetJwtTokenByRefreshToken;
 using Common.Api.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using Users.Services;
 
 namespace Auth.API.Controllers;
 
@@ -13,28 +12,32 @@ namespace Auth.API.Controllers;
 [Route("[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IAuthService _authService;
     private readonly ICurrentUserService _currentUserService;
 
-    public AuthController(IAuthService authService, ICurrentUserService currentUserService)
+    public AuthController(ICurrentUserService currentUserService)
     {
-        _authService = authService;
         _currentUserService = currentUserService;
     }
 
     [AllowAnonymous]
     [HttpPost("CreateJwtToken")]
-    public async Task<IActionResult> CreateJwtToken(AuthDto authDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateJwtToken(
+        GetJwtTokenQuery getJwtTokenQuery,
+        IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        var createdUser = await _authService.GetJwtTokenAsync(authDto,cancellationToken);
+        var createdUser = await mediator.Send(getJwtTokenQuery, cancellationToken);
         return Ok(createdUser);
     }
 
     [AllowAnonymous]
     [HttpPost("CreateJwtTokenByRefreshToken")]
-    public async Task<IActionResult> CreateJwtTokenByRefreshToken(string refreshToken, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateJwtTokenByRefreshToken(
+        GetJwtTokenByRefreshTokenQuery getJwtTokenByRefreshTokenQuery, 
+        IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        var createdUser = await _authService.GetJwtTokenByRefreshTokenAsync(refreshToken, cancellationToken);
+        var createdUser = await mediator.Send(getJwtTokenByRefreshTokenQuery, cancellationToken);
         return Ok(createdUser);
     }
 
@@ -53,3 +56,4 @@ public class AuthController : ControllerBase
         return Ok(user);
     }
 }
+

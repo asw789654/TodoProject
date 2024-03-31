@@ -1,11 +1,12 @@
-using Common.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog.Events;
 using Serilog;
 using System.Text;
-using Auth.BL;
+using Common.Persistence;
+using Auth.Application;
+using Common.Application;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -21,6 +22,7 @@ try
     builder.Services.AddControllers();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddCommonServices();
     builder.Services.AddAuthServices();
     builder.Services.AddSwaggerGen(options =>
     {

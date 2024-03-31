@@ -1,15 +1,16 @@
-using Common.Repositories;
 using Common.Api;
 using Serilog;
 using Serilog.Events;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using System.Text.Json.Serialization;
-using Users.BL;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Common.Api.Services;
+using Common.Persistence;
+using Users.Application;
+using Common.Application;
 
 internal class Programm
 {
@@ -28,8 +29,9 @@ internal class Programm
             x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles); ;
 
             builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddCommonServices();
             builder.Services.AddUsersServices();
-            builder.Services.AddTransient<ICurrentUserService, CurrentUserService>();
+            builder.Services.AddMemoryCache();
             //builder.Services.AddScoped<TodoService>();
             //builder.Services.AddSingleton<TodoService>();
             builder.Services.AddSwaggerGen(options =>
